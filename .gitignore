@@ -37,4 +37,4 @@ project/plugins/project/
 .cache
 .lib/
 .idea/
-project/
+project/target/*
