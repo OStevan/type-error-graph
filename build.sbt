@@ -10,6 +10,9 @@ scalaVersion := "2.11.8"
 
 crossScalaVersions := Seq("2.11.8", "2.12.1")
 
+libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
+
 scalacOptions ++= Seq(
   "-deprecation",
   "-unchecked",
@@ -17,6 +20,4 @@ scalacOptions ++= Seq(
 )
 
 
-lazy val inox = RootProject(file("../inox"))
-
-val error_messages = Project(id = "error_messages", base = file(".")).dependsOn(inox)
+val error_messages = Project(id = "error_messages", base = file("."))

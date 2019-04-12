@@ -1,9 +1,10 @@
 package ch.epfl.ognjanovic.stevan.error_messages.constraint_language
-import inox.parser.elaboration.{Constraints, SimpleTypes}
 
-trait ConstraintLanguage { self: Constraints with SimpleTypes =>
+import ch.epfl.ognjanovic.stevan.error_messages.inox.{Constraints, Types}
 
-  import SimpleTypes._
+trait ConstraintLanguage { self: Constraints with Types =>
+
+  import Types._
   import ConstraintConjuctions._
   import Hypotheses._
 
