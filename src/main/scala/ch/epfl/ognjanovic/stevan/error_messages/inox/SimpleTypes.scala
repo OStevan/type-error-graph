@@ -2,9 +2,9 @@ package ch.epfl.ognjanovic.stevan.error_messages.inox
 
 import scala.util.parsing.input.{Position, Positional}
 
-trait Types {
+trait SimpleTypes {
 
-  object Types {
+  object SimpleTypes {
 
     sealed abstract class Type extends Positional {
 

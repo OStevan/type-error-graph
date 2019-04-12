@@ -1,9 +1,9 @@
 package ch.epfl.ognjanovic.stevan.error_messages.inox
 
-trait Constraints { self: Types =>
+trait Constraints { self: SimpleTypes =>
   import Constraints._
   import TypeClasses._
-  import Types._
+  import SimpleTypes._
 
   sealed trait Constraint
   object Constraints {
@@ -30,8 +30,8 @@ trait Constraints { self: Types =>
       }))
     def atIndexIs(scrutinee: Type, index: Int, value: Type): Constraint =
       HasClass(scrutinee, WithIndices(Map(index -> value)))
-    def hasFields(elem: Type, fields: Set[String], sorts: Seq[(inox.Identifier, Type => Seq[Constraint])]): Constraint = {
-      val mapping = sorts.foldLeft(Map[inox.Identifier, Type => Seq[Constraint]]()) {
+    def hasFields(elem: Type, fields: Set[String], sorts: Seq[(Identifier, Type => Seq[Constraint])]): Constraint = {
+      val mapping = sorts.foldLeft(Map[Identifier, Type => Seq[Constraint]]()) {
         case (acc, (id, f)) => acc.get(id) match {
           case None => acc + (id -> f)
           case Some(f2) => acc + (id -> { (t: Type) => f2(t) ++ f(t) })
@@ -209,7 +209,7 @@ trait Constraints { self: Types =>
 
       def combine(that: TypeClass)(tpe: Type): Option[Seq[Constraint]] = (this, that) match {
         case (WithFields(fs1, s1), WithFields(fs2, s2)) => {
-          val intersect: Seq[inox.Identifier] = s1.keySet.intersect(s2.keySet).toSeq
+          val intersect: Seq[Identifier] = s1.keySet.intersect(s2.keySet).toSeq
 
           val size = intersect.size
           if (size == 0) {
@@ -256,7 +256,7 @@ trait Constraints { self: Types =>
       def accepts(tpe: Type): Option[Seq[Constraint]]
     }
 
-    case class WithFields(fields: Set[String], sorts: Map[inox.Identifier, Type => Seq[Constraint]]) extends TypeClass {
+    case class WithFields(fields: Set[String], sorts: Map[Identifier, Type => Seq[Constraint]]) extends TypeClass {
       override def accepts(tpe: Type) = tpe match {
         case ADTType(id, _) => sorts.get(id).map{_.apply(tpe)}
         case _ => None

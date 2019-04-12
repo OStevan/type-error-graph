@@ -1,7 +1,7 @@
 package ch.epfl.ognjanovic.stevan.error_messages.type_graph
 
 import ch.epfl.ognjanovic.stevan.error_messages.constraint_language.ConstraintLanguage
-import inox.parser.elaboration.{Constraints, SimpleTypes}
+import ch.epfl.ognjanovic.stevan.error_messages.inox.{Constraints, SimpleTypes}
 
 trait GraphStructure {
   self: ConstraintLanguage with SimpleTypes with Constraints =>
@@ -12,6 +12,7 @@ trait GraphStructure {
   import Edges._
   import TypeClasses._
   import Nodes._
+
   trait Node
   object Nodes {
     case class TypeNode(tpe: SimpleTypes.Type) extends Node
@@ -49,7 +50,7 @@ trait GraphStructure {
 
   }
 
-  class Graph(private val nodes: Set[Node], private val edges: Set[Edge]) {
+  class Graph(val nodes: Set[Node], val edges: Set[Edge]) {
     def union(other: Graph): Graph = {
       Graph(this.nodes union other.nodes, this.edges union other.edges)
     }
