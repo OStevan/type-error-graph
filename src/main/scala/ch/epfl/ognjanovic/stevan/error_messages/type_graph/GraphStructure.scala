@@ -47,7 +47,6 @@ trait GraphStructure {
     import ConstructorEdgeDirection._
     case class LessEqualEdge(from: Node, to: Node, hypothesis: Hypothesis) extends Edge
     case class ConstructorEdge(parent: Node, subElement: Node, direction: Direction) extends Edge
-
   }
 
   class Graph(val nodes: Set[Node], val edges: Set[Edge]) {
@@ -67,19 +66,21 @@ trait GraphStructure {
 
   def constructSeq(types: Seq[SimpleTypes.Type]): Seq[(Node, Graph)] = types.map(tpe => construct(tpe))
 
-  def construct(assertion: Assertion): Graph = assertion.constraint match {
+  def construct(assertion: Assertion): Graph = construct(assertion.constraint, assertion.hypothesis)
+
+  def construct(constraint: Constraint, hypothesis: Hypothesis): Graph = constraint match {
     case Constraints.Equals(left, right) =>
-      val (leftNode, leftGraph) = construct(left)
-      val (rightNode, rightGraph) = construct(right)
+      val (leftNode: Node, leftGraph: Graph) = construct(left)
+      val (rightNode: Node, rightGraph: Graph) = construct(right)
       leftGraph union rightGraph union Graph(Set.empty,
         Set(
-          LessEqualEdge(leftNode, rightNode, assertion.hypothesis),
-          LessEqualEdge(rightNode, leftNode, assertion.hypothesis)
+          LessEqualEdge(leftNode, rightNode, hypothesis),
+          LessEqualEdge(rightNode, leftNode, hypothesis)
         ))
     case Constraints.HasClass(elem, typeClass) =>
       val (elemNode, elemGraph) = construct(elem)
       val typeClassNode = TypeClassNode(typeClass)
-      elemGraph union Graph(typeClassNode) union Graph(LessEqualEdge(elemNode, typeClassNode, assertion.hypothesis))
+      elemGraph union Graph(typeClassNode) union Graph(LessEqualEdge(elemNode, typeClassNode, hypothesis))
     case Constraints.OneOf(unknown, tpe, options) =>
       val (unknownNode, unknownGraph) = construct(unknown)
       val (tpeNode, tpeGraph) = construct(tpe)
@@ -88,19 +89,20 @@ trait GraphStructure {
 
       val oneOfGraph = (unknownGraph
         union tpeGraph
-        union Graph(LessEqualEdge(unknownNode, tpeNode, assertion.hypothesis))
-        union Graph(LessEqualEdge(tpeNode, unknownNode, assertion.hypothesis))
+        union Graph(LessEqualEdge(unknownNode, tpeNode, hypothesis))
+        union Graph(LessEqualEdge(tpeNode, unknownNode, hypothesis))
         union Graph(optionsNode)
-        union Graph(LessEqualEdge(tpeNode, optionsNode, assertion.hypothesis))
+        union Graph(LessEqualEdge(tpeNode, optionsNode, hypothesis))
         )
 
       optionsNodeGraphPairs.foldLeft(oneOfGraph)((graph, pair) => graph
         union pair._2
-        union Graph(LessEqualEdge(optionsNode, pair._1, assertion.hypothesis)))
+        union Graph(LessEqualEdge(optionsNode, pair._1, hypothesis)))
     case _ =>
       // ignore exists currently
       Graph.empty()
   }
+
 
   def construct(tpe: SimpleTypes.Type): (Node, Graph) = tpe match {
     case SimpleTypes.FunctionType(froms, to) =>
